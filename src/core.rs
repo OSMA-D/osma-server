@@ -1,5 +1,6 @@
 use actix_web::web::Json;
 use bson::{doc, Document};
+use chrono::Utc;
 use futures::TryStreamExt;
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use mongodb::{Collection, Database};
@@ -35,9 +36,10 @@ impl Core {
     }
 
     pub async fn signup(&self, user: &Json<User>) -> serde_json::Value {
-        let jwt_info = doc! {
-            "name": &user.name,
-            "role": "user".to_string(),
+        let jwt_info = JwtInfo {
+            name: user.name.clone(),
+            role: "user".to_string(),
+            exp: Utc::now().timestamp() + 604800, //week
         };
 
         let token = encode(
@@ -65,7 +67,7 @@ impl Core {
                     Err(e) => {
                         json! ({
                             "code":"err",
-                            "err":"User with this name already exists"
+                            "msg":"User with this name already exists"
                         })
                     }
                 }
@@ -73,7 +75,7 @@ impl Core {
             Err(e) => {
                 json! ({
                     "code":"err",
-                    "err":"Some problem with jwt generation"
+                    "msg":"Some problem with jwt generation"
                 })
             }
         }
