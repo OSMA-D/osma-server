@@ -15,3 +15,11 @@ pub struct User {
     pub password: String,
     pub email: String,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AuthInfo {
+    pub name: String,
+    pub password: String,
+    pub email: String,
+    pub role: String,
+}
