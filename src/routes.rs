@@ -12,6 +12,19 @@ pub async fn signup(app_data: web::Data<crate::AppState>, user: web::Json<User>)
     }
 }
 
+#[post("/api/signin")]
+pub async fn signin(
+    app_data: web::Data<crate::AppState>,
+    user: web::Json<UserAuth>,
+) -> impl Responder {
+    let result = app_data.core.signin(&user.name, &user.password).await;
+    if result["code"] == "ok" {
+        HttpResponse::Ok().json(result)
+    } else {
+        HttpResponse::Forbidden().json(result)
+    }
+}
+
 #[get("/api/apps")]
 pub async fn apps(app_data: web::Data<crate::AppState>) -> impl Responder {
     HttpResponse::Ok().json(app_data.core.get_apps().await)
