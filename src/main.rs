@@ -36,6 +36,7 @@ async fn main() -> std::io::Result<()> {
             }))
             .service(routes::apps)
             .service(routes::signup)
+            .service(routes::signin)
     })
     .bind(("0.0.0.0", port))
     .expect("Can not bind to port")
