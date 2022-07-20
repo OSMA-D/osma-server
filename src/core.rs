@@ -1,16 +1,17 @@
 use actix_web::web::Json;
+
 use bson::{doc, Document};
 use chrono::Utc;
 use futures::TryStreamExt;
-use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
+use jsonwebtoken::{encode, EncodingKey, Header};
 use mongodb::{Collection, Database};
-use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sha3::{Digest, Sha3_256};
 use std::env;
 
 use crate::types::*;
 
+// #[derive(Clone)]
 pub struct Core {
     users: Collection<Document>,
     apps: Collection<Document>,
@@ -41,8 +42,8 @@ impl Core {
             Ok(user) => {
                 match user {
                     Some(user) => {
-                        let passHash = self.hash(name.clone() + &password);
-                        if (user.get_str("password").unwrap() == passHash) {
+                        let pass_hash = self.hash(name.clone() + &password);
+                        if user.get_str("password").unwrap() == pass_hash {
                             let jwt_info = JwtInfo {
                                 name: name.clone(),
                                 role: user.get_str("role").unwrap().to_string(),
@@ -62,7 +63,7 @@ impl Core {
                                         "token":token
                                     })
                                 }
-                                Err(e) => {
+                                Err(_) => {
                                     json! ({
                                         "code":"err",
                                         "msg":"Some problem with jwt generation"
@@ -72,7 +73,7 @@ impl Core {
                         } else {
                             json! ({
                                 "code":"denied",
-                                "msg":"wrong password"
+                                "msg":"Wrong password"
                             })
                         }
                     }
@@ -84,7 +85,7 @@ impl Core {
                     }
                 }
             }
-            Err(e) => {
+            Err(_) => {
                 json! ({
                     "code":"err",
                     "msg":"User does not exist"
@@ -116,21 +117,21 @@ impl Core {
                 };
                 let response = self.users.insert_one(&auth_info, None).await;
                 match response {
-                    Ok(r) => {
+                    Ok(_) => {
                         json! ({
                             "code":"ok",
                             "token":token
                         })
                     }
-                    Err(e) => {
+                    Err(_) => {
                         json! ({
                             "code":"err",
-                            "msg":"User with this name already exists"
+                            "msg":"User with this name already exist"
                         })
                     }
                 }
             }
-            Err(e) => {
+            Err(_) => {
                 json! ({
                     "code":"err",
                     "msg":"Some problem with jwt generation"
@@ -138,9 +139,9 @@ impl Core {
             }
         }
     }
-    fn hash(&self, toHash: String) -> String {
+    fn hash(&self, to_hash: String) -> String {
         let mut hasher = Sha3_256::new();
-        hasher.update(toHash + &self.salt);
+        hasher.update(to_hash + &self.salt);
         let hash = hasher.finalize();
         format!("{:x}", hash)
     }
