@@ -1,5 +1,6 @@
 use crate::types::*;
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
+use actix_web_grants::proc_macro::{has_any_permission, has_permissions};
 
 #[post("/api/signup")]
 pub async fn signup(app_data: web::Data<crate::AppState>, user: web::Json<User>) -> impl Responder {
@@ -26,6 +27,34 @@ pub async fn signin(
 }
 
 #[get("/api/apps")]
+#[has_any_permission("user", "admin")]
 pub async fn apps(app_data: web::Data<crate::AppState>) -> impl Responder {
     HttpResponse::Ok().json(app_data.core.get_apps().await)
 }
+
+#[post("/api/update")]
+#[has_any_permission("user", "admin")]
+pub async fn update(
+    app_data: web::Data<crate::AppState>,
+    update_info: web::Json<UserData>,
+    req: HttpRequest,
+) -> impl Responder {
+    let result = app_data
+        .core
+        .update_user(&username(req), &update_info)
+        .await;
+    HttpResponse::Ok().json(result)
+}
+
+fn username(req: HttpRequest) -> String {
+    req.headers()
+        .get("osma-username")
+        .unwrap()
+        .to_str()
+        .ok()
+        .unwrap()
+        .to_string()
+}
+
+//req: HttpRequest
+//secure = "username(req)==user.name"

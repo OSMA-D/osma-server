@@ -30,9 +30,7 @@ pub struct JwtInfo {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct AuthInfo {
-    pub name: String,
-    pub password: String,
+pub struct UserData {
     pub email: String,
-    pub role: String,
+    pub img: String,
 }
