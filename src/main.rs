@@ -44,6 +44,10 @@ async fn jwt_validator(
         }
         Err(_) => {
             req.attach(vec!["none".to_string()]);
+            req.headers_mut().insert(
+                HeaderName::from_lowercase(b"osma-username").unwrap(),
+                HeaderValue::from_str("no").unwrap(),
+            );
             Ok(req)
         }
     }
@@ -77,6 +81,7 @@ async fn main() -> std::io::Result<()> {
             .service(routes::apps)
             .service(routes::signup)
             .service(routes::signin)
+            .service(routes::update)
     })
     .bind(("0.0.0.0", port))
     .expect("Can not bind to port")
