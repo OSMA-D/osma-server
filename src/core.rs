@@ -64,6 +64,65 @@ impl Core {
         }
     }
 
+    pub async fn change_password(
+        &self,
+        name: &String,
+        old: &String,
+        new: &String,
+    ) -> serde_json::Value {
+        let response = self.users.find_one(doc! {"name":&name}, None).await;
+        match response {
+            Ok(user) => match user {
+                Some(user) => {
+                    let old_pass_hash = self.hash(name.clone() + &old);
+                    if &old_pass_hash == user.get_str("password").unwrap() {
+                        let response = self
+                            .users
+                            .update_one(
+                                doc! {"name": name},
+                                doc! {"$set": {
+                                    "password":&self.hash(name.clone() + &new),
+                                }},
+                                None,
+                            )
+                            .await;
+                        match response {
+                            Ok(_) => {
+                                json! ({
+                                    "code":"ok",
+                                    "msg":"User information updated"
+                                })
+                            }
+                            Err(_) => {
+                                json! ({
+                                    "code":"err",
+                                    "msg":"Some error"
+                                })
+                            }
+                        }
+                    } else {
+                        json! ({
+                            "code":"denied",
+                            "msg":"Wrong password"
+                        })
+                    }
+                }
+                None => {
+                    json! ({
+                        "code":"denied",
+                        "msg":"User does not exist"
+                    })
+                }
+            },
+            Err(_e) => {
+                json! ({
+                    "code":"err",
+                    "msg":"User does not exist"
+                })
+            }
+        }
+    }
+
     pub async fn signin(&self, name: &String, password: &String) -> serde_json::Value {
         let response = self.users.find_one(doc! {"name":name}, None).await;
         match response {
