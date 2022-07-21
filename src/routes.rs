@@ -43,7 +43,11 @@ pub async fn update(
         .core
         .update_user(&username(req), &update_info)
         .await;
-    HttpResponse::Ok().json(result)
+    if result["code"] == "ok" {
+        HttpResponse::Ok().json(result)
+    } else {
+        HttpResponse::Forbidden().json(result)
+    }
 }
 
 fn username(req: HttpRequest) -> String {
