@@ -1,5 +1,5 @@
 use actix_cors::Cors;
-use actix_web::{web::Data, App, Error, HttpServer};
+use actix_web::{web, App, Error, HttpServer};
 use dotenv::dotenv;
 use std::env;
 
@@ -73,15 +73,21 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         let cors = Cors::default().allow_any_origin();
         App::new()
-            .app_data(Data::new(AppState {
+            .app_data(web::Data::new(AppState {
                 core: core::Core::new(&db),
             }))
             .wrap(cors)
-            .wrap(HttpAuthentication::bearer(jwt_validator))
-            .service(routes::apps)
-            .service(routes::signup)
-            .service(routes::signin)
-            .service(routes::update)
+            .service(
+                web::scope("/api")
+                    .wrap(HttpAuthentication::bearer(jwt_validator))
+                    .service(routes::apps)
+                    .service(routes::update),
+            )
+            .service(
+                web::scope("/auth")
+                    .service(routes::signup)
+                    .service(routes::signin),
+            )
     })
     .bind(("0.0.0.0", port))
     .expect("Can not bind to port")

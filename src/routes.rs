@@ -2,7 +2,7 @@ use crate::types::*;
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 use actix_web_grants::proc_macro::{has_any_permission, has_permissions};
 
-#[post("/api/signup")]
+#[post("/signup")]
 pub async fn signup(app_data: web::Data<crate::AppState>, user: web::Json<User>) -> impl Responder {
     let result = app_data.core.signup(&user).await;
 
@@ -13,7 +13,7 @@ pub async fn signup(app_data: web::Data<crate::AppState>, user: web::Json<User>)
     }
 }
 
-#[post("/api/signin")]
+#[post("/signin")]
 pub async fn signin(
     app_data: web::Data<crate::AppState>,
     user: web::Json<UserAuth>,
@@ -26,13 +26,13 @@ pub async fn signin(
     }
 }
 
-#[get("/api/apps")]
+#[get("/apps")]
 #[has_any_permission("user", "admin")]
 pub async fn apps(app_data: web::Data<crate::AppState>) -> impl Responder {
     HttpResponse::Ok().json(app_data.core.get_apps().await)
 }
 
-#[post("/api/update")]
+#[post("/update")]
 #[has_any_permission("user", "admin")]
 pub async fn update(
     app_data: web::Data<crate::AppState>,
