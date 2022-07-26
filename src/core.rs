@@ -37,6 +37,33 @@ impl Core {
         self.get_collection(&self.apps).await
     }
 
+    pub async fn update_user(&self, name: &String, info: &Json<UserData>) -> serde_json::Value {
+        let response = self
+            .users
+            .update_one(
+                doc! {"name": name},
+                doc! {"$set": {
+                    "email":&info.email,
+                    "img":&info.img
+                }},
+                None,
+            )
+            .await;
+        match response {
+            Ok(_) => {
+                json! ({
+                    "code":"ok",
+                    "msg":"User information updated"
+                })
+            }
+            Err(_) => {
+                json! ({
+                    "code":"err",
+                    "msg":"Unknown error"
+                })
+            }
+        }
+    }
     pub async fn signin(&self, name: &String, password: &String) -> serde_json::Value {
         let response = self.users.find_one(doc! {"name":name}, None).await;
         match response {

@@ -28,3 +28,10 @@ pub struct JwtInfo {
     pub role: String,
     pub exp: i64,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct UserData {
+    pub email: String,
+    pub img: String,
+}
+

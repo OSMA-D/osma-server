@@ -20,6 +20,30 @@ pub async fn signin(
 pub async fn apps(app_data: web::Data<crate::AppState>) -> impl Responder {
     HttpResponse::Ok().json(app_data.core.get_apps().await)
 }
+#[post("/update")]
+#[has_any_permission("user", "admin")]
+pub async fn update(
+    app_data: web::Data<crate::AppState>,
+    update_info: web::Json<UserData>,
+    req: HttpRequest,
+) -> impl Responder {
+    response(
+        app_data
+            .core
+            .update_user(&username(req), &update_info)
+            .await,
+    )
+}
+fn username(req: HttpRequest) -> String {
+    req.headers()
+        .get("osma-username")
+        .unwrap()
+        .to_str()
+        .ok()
+        .unwrap()
+        .to_string()
+}
+
 fn response(result: serde_json::Value) -> impl Responder {
     if result["code"] == "ok" {
         HttpResponse::Ok().json(result)

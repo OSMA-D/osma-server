@@ -81,11 +81,13 @@ async fn main() -> std::io::Result<()> {
                 web::scope("/api")
                     .wrap(HttpAuthentication::bearer(jwt_validator))
                     .service(routes::apps)
+                    .service(routes::update)
             )
             .service(
                 web::scope("/auth")
                     .service(routes::signup)
                     .service(routes::signin),
+            )
     })
     .bind(("0.0.0.0", port))
     .expect("Can not bind to port")
