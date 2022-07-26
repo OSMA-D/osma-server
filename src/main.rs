@@ -19,6 +19,40 @@ pub struct AppState {
     core: core::Core,
 }
 
+async fn jwt_validator(
+    mut req: ServiceRequest,
+    credentials: BearerAuth,
+) -> Result<ServiceRequest, (Error, ServiceRequest)> {
+    let token = decode::<types::JwtInfo>(
+        &credentials.token(),
+        &DecodingKey::from_secret(
+            env::var("JWT_SECRET")
+                .expect("JWT_SECRET not found")
+                .as_ref(),
+        ),
+        &Validation::default(),
+    );
+    match token {
+        Ok(token) => {
+            req.attach(vec![token.claims.role]);
+            req.headers_mut().insert(
+                HeaderName::from_lowercase(b"osma-username").unwrap(),
+                HeaderValue::from_str(&token.claims.name).unwrap(),
+            );
+
+            Ok(req)
+        }
+        Err(_) => {
+            req.attach(vec!["none".to_string()]);
+            req.headers_mut().insert(
+                HeaderName::from_lowercase(b"osma-username").unwrap(),
+                HeaderValue::from_str("no").unwrap(),
+            );
+            Ok(req)
+        }
+    }
+}
+
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
@@ -43,7 +77,13 @@ async fn main() -> std::io::Result<()> {
                 core: core::Core::new(&db),
             }))
             .wrap(cors)
+            .service(
+                web::scope("/api")
+                    .wrap(HttpAuthentication::bearer(jwt_validator))
                     .service(routes::apps)
+            )
+            .service(
+                web::scope("/auth")
                     .service(routes::signup)
                     .service(routes::signin),
     })
