@@ -30,6 +30,12 @@ pub async fn reviews(
     HttpResponse::Ok().json(app_data.core.get_reviews(&app_name_id).await)
 }
 
+#[get("/app/{name}")]
+#[has_any_permission("user", "admin")]
+pub async fn app(app_data: web::Data<crate::AppState>, name: web::Path<String>) -> impl Responder {
+    response(app_data.core.get_app(&name).await)
+}
+
 #[post("/change_password")]
 #[has_any_permission("user", "admin")]
 pub async fn change_password(
@@ -81,3 +87,6 @@ fn response(result: serde_json::Value) -> impl Responder {
         HttpResponse::InternalServerError().json(result)
     }
 }
+
+//req: HttpRequest
+//secure = "username(req)==user.name"

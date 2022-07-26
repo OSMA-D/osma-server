@@ -37,6 +37,30 @@ impl Core {
         self.get_collection(&self.apps).await
     }
 
+    pub async fn get_app(&self, name: &String) -> serde_json::Value {
+        let response = self.apps.find_one(doc! {"name_id":&name}, None).await;
+        match response {
+            Ok(response) => match response {
+                Some(result) => json!({
+                    "code":"ok_body",
+                    "body": result
+                }),
+                None => {
+                    json! ({
+                        "code":"denied",
+                        "msg":"This app does not exist"
+                    })
+                }
+            },
+            Err(_) => {
+                json! ({
+                    "code":"err",
+                    "msg":"Unknown error"
+                })
+            }
+        }
+    }
+
     pub async fn write_review(&self, name: &String, info: &Json<ReviewData>) -> serde_json::Value {
         let options = FindOneOptions::builder()
             .projection(doc! {"_id" : 1})
