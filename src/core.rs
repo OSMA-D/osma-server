@@ -61,6 +61,57 @@ impl Core {
         }
     }
 
+    pub async fn get_rating(&self, app_name_id: &String) -> serde_json::Value {
+        let result = self
+            .reviews
+            .aggregate(
+                [
+                    doc! {"$match":{"app_name_id":app_name_id}},
+                    doc! {
+                        "$group": {
+                            "_id": "$app_name_id",
+                            "rating": {
+                                "$avg": "$score"
+                            },
+                        },
+                    },
+                ],
+                None,
+            )
+            .await;
+
+        match result {
+            Ok(mut result) => match result.next().await {
+                Some(result) => match result {
+                    Ok(result) => {
+                        json! ({
+                            "code":"ok_body",
+                            "body":result
+                        })
+                    }
+                    Err(_) => {
+                        json! ({
+                            "code":"err",
+                            "msg":"Unknown error"
+                        })
+                    }
+                },
+                None => {
+                    json! ({
+                        "code":"denied",
+                        "msg":"This app does not exist"
+                    })
+                }
+            },
+            Err(_) => {
+                json! ({
+                    "code":"err",
+                    "msg":"Unknown error"
+                })
+            }
+        }
+    }
+
     pub async fn get_reviews(&self, app_name_id: &String) -> Vec<Document> {
         self.get_collection_with_params(&self.reviews, doc! {"app_name_id":app_name_id})
             .await
