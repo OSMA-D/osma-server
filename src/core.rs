@@ -37,6 +37,64 @@ impl Core {
         self.get_collection(&self.apps).await
     }
 
+    pub async fn signin(&self, name: &String, password: &String) -> serde_json::Value {
+        let response = self.users.find_one(doc! {"name":name}, None).await;
+        match response {
+            Ok(user) => {
+                match user {
+                    Some(user) => {
+                        let pass_hash = self.hash(name.clone() + &password);
+                        if user.get_str("password").unwrap() == pass_hash {
+                            let jwt_info = JwtInfo {
+                                name: name.clone(),
+                                role: user.get_str("role").unwrap().to_string(),
+                                exp: Utc::now().timestamp() + 604800, //week
+                            };
+
+                            let token = encode(
+                                &Header::default(),
+                                &jwt_info,
+                                &EncodingKey::from_secret(self.jwt_secret.as_ref()),
+                            );
+
+                            match token {
+                                Ok(token) => {
+                                    json! ({
+                                        "code":"ok",
+                                        "token":token
+                                    })
+                                }
+                                Err(_) => {
+                                    json! ({
+                                        "code":"err",
+                                        "msg":"Some problem with jwt generation"
+                                    })
+                                }
+                            }
+                        } else {
+                            json! ({
+                                "code":"denied",
+                                "msg":"Wrong password"
+                            })
+                        }
+                    }
+                    None => {
+                        json! ({
+                            "code":"err",
+                            "msg":"User does not exist"
+                        })
+                    }
+                }
+            }
+            Err(_) => {
+                json! ({
+                    "code":"err",
+                    "msg":"User does not exist"
+                })
+            }
+        }
+    }
+
     pub async fn signup(&self, user: &Json<User>) -> serde_json::Value {
         let jwt_info = JwtInfo {
             name: user.name.clone(),

@@ -15,6 +15,14 @@ pub struct User {
     pub password: String,
     pub email: String,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct UserAuth {
+    pub name: String,
+    pub password: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct JwtInfo {
     pub name: String,
     pub role: String,

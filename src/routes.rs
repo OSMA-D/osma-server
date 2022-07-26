@@ -5,6 +5,15 @@ use actix_web_grants::proc_macro::{has_any_permission, has_permissions};
 pub async fn signup(app_data: web::Data<crate::AppState>, user: web::Json<User>) -> impl Responder {
     response(app_data.core.signup(&user).await)
 }
+
+#[post("/signin")]
+pub async fn signin(
+    app_data: web::Data<crate::AppState>,
+    user: web::Json<UserAuth>,
+) -> impl Responder {
+    response(app_data.core.signin(&user.name, &user.password).await)
+}
+
 #[get("/apps")]
 pub async fn apps(app_data: web::Data<crate::AppState>) -> impl Responder {
     HttpResponse::Ok().json(app_data.core.get_apps().await)
