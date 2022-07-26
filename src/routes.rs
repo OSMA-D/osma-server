@@ -65,6 +65,22 @@ pub async fn update(
             .await,
     )
 }
+
+#[post("/write_review")]
+#[has_any_permission("user", "admin")]
+pub async fn write_review(
+    app_data: web::Data<crate::AppState>,
+    review_data: web::Json<ReviewData>,
+    req: HttpRequest,
+) -> impl Responder {
+    response(
+        app_data
+            .core
+            .write_review(&username(req), &review_data)
+            .await,
+    )
+}
+
 fn username(req: HttpRequest) -> String {
     req.headers()
         .get("osma-username")

@@ -61,6 +61,11 @@ impl Core {
         }
     }
 
+    pub async fn get_reviews(&self, app_name_id: &String) -> Vec<Document> {
+        self.get_collection_with_params(&self.reviews, doc! {"app_name_id":app_name_id})
+            .await
+    }
+
     pub async fn write_review(&self, name: &String, info: &Json<ReviewData>) -> serde_json::Value {
         let options = FindOneOptions::builder()
             .projection(doc! {"_id" : 1})
@@ -313,6 +318,21 @@ impl Core {
         let hash = hasher.finalize();
         format!("{:x}", hash)
     }
+
+    async fn get_collection_with_params(
+        &self,
+        collection: &Collection<Document>,
+        params: Document,
+    ) -> Vec<Document> {
+        let options = FindOptions::builder().projection(doc! {"_id" : 0}).build();
+        let cursor = match collection.find(params, options).await {
+            Ok(cursor) => cursor,
+            Err(_) => return vec![],
+        };
+
+        cursor.try_collect().await.unwrap_or_else(|_| vec![])
+    }
+
     async fn get_collection(&self, collection: &Collection<Document>) -> Vec<Document> {
         let options = FindOptions::builder().projection(doc! {"_id" : 0}).build();
         let cursor = match collection.find(None, options).await {
