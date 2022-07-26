@@ -44,6 +44,7 @@ async fn main() -> std::io::Result<()> {
             }))
             .wrap(cors)
                     .service(routes::apps)
+                    .service(routes::signup)
     })
     .bind(("0.0.0.0", port))
     .expect("Can not bind to port")
