@@ -37,6 +37,62 @@ impl Core {
         self.get_collection(&self.apps).await
     }
 
+    pub async fn write_review(&self, name: &String, info: &Json<ReviewData>) -> serde_json::Value {
+        let options = FindOneOptions::builder()
+            .projection(doc! {"_id" : 1})
+            .build();
+        let response = self
+            .apps
+            .find_one(doc! {"name_id":&info.app_name_id}, options)
+            .await;
+
+        match response {
+            Ok(response) => match response {
+                Some(_) => {
+                    let options = UpdateOptions::builder().upsert(Some(true)).build();
+                    let response = self
+                        .reviews
+                        .update_one(
+                            doc! {"user_name": name},
+                            doc! {"$set": {
+                                "app_name_id":&info.app_name_id,
+                                "text":&info.text,
+                                "score":&info.score,
+                            }},
+                            options,
+                        )
+                        .await;
+                    match response {
+                        Ok(_) => {
+                            json! ({
+                                "code":"ok",
+                                "msg":"The review is written"
+                            })
+                        }
+                        Err(_) => {
+                            json! ({
+                                "code":"err",
+                                "msg":"Validation error"
+                            })
+                        }
+                    }
+                }
+                None => {
+                    json! ({
+                        "code":"denied",
+                        "msg":"This app does not exist"
+                    })
+                }
+            },
+            Err(_) => {
+                json! ({
+                    "code":"err",
+                    "msg":"Unknown error"
+                })
+            }
+        }
+    }
+
     pub async fn update_user(&self, name: &String, info: &Json<UserData>) -> serde_json::Value {
         let response = self
             .users

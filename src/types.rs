@@ -36,6 +36,13 @@ pub struct UserData {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct ReviewData {
+    pub app_name_id: String,
+    pub score: i32,
+    pub text: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct PasswordsInf {
     pub old_password: String,
     pub new_password: String,
