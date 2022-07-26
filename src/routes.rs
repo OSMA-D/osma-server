@@ -20,6 +20,21 @@ pub async fn signin(
 pub async fn apps(app_data: web::Data<crate::AppState>) -> impl Responder {
     HttpResponse::Ok().json(app_data.core.get_apps().await)
 }
+#[post("/change_password")]
+#[has_any_permission("user", "admin")]
+pub async fn change_password(
+    app_data: web::Data<crate::AppState>,
+    info: web::Json<PasswordsInf>,
+    req: HttpRequest,
+) -> impl Responder {
+    response(
+        app_data
+            .core
+            .change_password(&username(req), &info.old_password, &info.new_password)
+            .await,
+    )
+}
+
 #[post("/update")]
 #[has_any_permission("user", "admin")]
 pub async fn update(

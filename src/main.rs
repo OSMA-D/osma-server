@@ -82,6 +82,7 @@ async fn main() -> std::io::Result<()> {
                     .wrap(HttpAuthentication::bearer(jwt_validator))
                     .service(routes::apps)
                     .service(routes::update)
+                    .service(routes::change_password)
             )
             .service(
                 web::scope("/auth")
