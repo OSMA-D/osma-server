@@ -49,6 +49,6 @@ pub struct PasswordsInf {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct AppToAdd {
+pub struct AppInfo {
     pub name: String,
 }

@@ -214,6 +214,37 @@ impl Core {
         }
     }
 
+    pub async fn delete_app_from_personal_library(
+        &self,
+        name: &String,
+        app: &String,
+    ) -> serde_json::Value {
+        let response = self
+            .personal_libraries
+            .update_one(
+                doc! {"name": name},
+                doc! {"$pull": {
+                    "apps":&app,
+                }},
+                None,
+            )
+            .await;
+        match response {
+            Ok(_) => {
+                json! ({
+                    "code":"ok",
+                    "msg":"App deleted from personal library"
+                })
+            }
+            Err(_) => {
+                json! ({
+                    "code":"err",
+                    "msg":"Unknown error"
+                })
+            }
+        }
+    }
+
     pub async fn add_app_to_personal_library(
         &self,
         name: &String,

@@ -79,13 +79,28 @@ pub async fn update(
 #[has_any_permission("user", "admin")]
 pub async fn add_app_to_personal_library(
     app_data: web::Data<crate::AppState>,
-    app_info: web::Json<AppToAdd>,
+    app_info: web::Json<AppInfo>,
     req: HttpRequest,
 ) -> impl Responder {
     response(
         app_data
             .core
             .add_app_to_personal_library(&username(req), &app_info.name)
+            .await,
+    )
+}
+
+#[post("/delete_app_from_personal_library")]
+#[has_any_permission("user", "admin")]
+pub async fn delete_app_from_personal_library(
+    app_data: web::Data<crate::AppState>,
+    app_info: web::Json<AppInfo>,
+    req: HttpRequest,
+) -> impl Responder {
+    response(
+        app_data
+            .core
+            .delete_app_from_personal_library(&username(req), &app_info.name)
             .await,
     )
 }
