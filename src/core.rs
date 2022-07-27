@@ -112,6 +112,19 @@ impl Core {
         }
     }
 
+    async fn create_personal_library(&self, name: &String) {
+        self.personal_libraries
+            .insert_one(
+                doc! {
+                    "name":name,
+                    "apps":[]
+                },
+                None,
+            )
+            .await
+            .unwrap();
+    }
+
     pub async fn get_reviews(&self, app_name_id: &String) -> Vec<Document> {
         self.get_collection_with_params(&self.reviews, doc! {"app_name_id":app_name_id})
             .await
@@ -342,6 +355,7 @@ impl Core {
                 let response = self.users.insert_one(&auth_info, None).await;
                 match response {
                     Ok(_) => {
+                        self.create_personal_library(&user.name).await;
                         json! ({
                             "code":"ok",
                             "token":token
