@@ -47,3 +47,8 @@ pub struct PasswordsInf {
     pub old_password: String,
     pub new_password: String,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AppToAdd {
+    pub name: String,
+}

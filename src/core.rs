@@ -214,6 +214,59 @@ impl Core {
         }
     }
 
+    pub async fn add_app_to_personal_library(
+        &self,
+        name: &String,
+        app: &String,
+    ) -> serde_json::Value {
+        let options = FindOneOptions::builder()
+            .projection(doc! {"_id" : 1})
+            .build();
+        let response = self.apps.find_one(doc! {"name_id":&app}, options).await;
+        match response {
+            Ok(response) => match response {
+                Some(_) => {
+                    let response = self
+                        .personal_libraries
+                        .update_one(
+                            doc! {"name": name},
+                            doc! {"$push": {
+                                "apps":&app,
+                            }},
+                            None,
+                        )
+                        .await;
+                    match response {
+                        Ok(_) => {
+                            json! ({
+                                "code":"ok",
+                                "msg":"App added to personal library"
+                            })
+                        }
+                        Err(_) => {
+                            json! ({
+                                "code":"err",
+                                "msg":"App already in the library | Unknown error"
+                            })
+                        }
+                    }
+                }
+                None => {
+                    json! ({
+                        "code":"denied",
+                        "msg":"This app does not exist"
+                    })
+                }
+            },
+            Err(_) => {
+                json! ({
+                    "code":"err",
+                    "msg":"Unknown error"
+                })
+            }
+        }
+    }
+
     pub async fn change_password(
         &self,
         name: &String,

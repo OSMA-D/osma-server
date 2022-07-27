@@ -75,6 +75,21 @@ pub async fn update(
     )
 }
 
+#[post("/add_app_to_personal_library")]
+#[has_any_permission("user", "admin")]
+pub async fn add_app_to_personal_library(
+    app_data: web::Data<crate::AppState>,
+    app_info: web::Json<AppToAdd>,
+    req: HttpRequest,
+) -> impl Responder {
+    response(
+        app_data
+            .core
+            .add_app_to_personal_library(&username(req), &app_info.name)
+            .await,
+    )
+}
+
 #[post("/write_review")]
 #[has_any_permission("user", "admin")]
 pub async fn write_review(
@@ -108,7 +123,6 @@ fn response(result: serde_json::Value) -> impl Responder {
     } else if result["code"] == "denied" {
         HttpResponse::Forbidden().json(result)
     } else {
-        println!("{}", result["code"]);
         HttpResponse::InternalServerError().json(result)
     }
 }
