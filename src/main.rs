@@ -93,7 +93,8 @@ async fn main() -> std::io::Result<()> {
                     .service(routes::change_password)
                     .service(routes::write_review)
                     .service(routes::add_app_to_personal_library)
-                    .service(routes::delete_app_from_personal_library),
+                    .service(routes::delete_app_from_personal_library)
+                    .service(routes::apps_by_tags),
             )
             .service(
                 web::scope("/auth")

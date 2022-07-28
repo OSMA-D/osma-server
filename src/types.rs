@@ -52,3 +52,8 @@ pub struct PasswordsInf {
 pub struct AppInfo {
     pub app_id: String,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AppTags {
+    pub tags: Vec<String>,
+}

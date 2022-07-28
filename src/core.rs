@@ -159,6 +159,11 @@ impl Core {
             .await
     }
 
+    pub async fn get_apps_by_tag(&self, info: &AppTags) -> Vec<Document> {
+        self.get_collection_with_params(&self.apps, doc! {"tags":{"$in":&info.tags}})
+            .await
+    }
+
     pub async fn get_versions(&self, app_id: &String) -> Vec<Document> {
         self.get_collection_with_params_and_sort(
             &self.apps_versions,

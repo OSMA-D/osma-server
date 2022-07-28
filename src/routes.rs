@@ -21,6 +21,15 @@ pub async fn apps(app_data: web::Data<crate::AppState>) -> impl Responder {
     HttpResponse::Ok().json(app_data.core.get_apps().await)
 }
 
+#[post("/apps_by_tag")]
+#[has_any_permission("user", "admin")]
+pub async fn apps_by_tags(
+    app_data: web::Data<crate::AppState>,
+    info: web::Json<AppTags>,
+) -> impl Responder {
+    HttpResponse::Ok().json(app_data.core.get_apps_by_tag(&info).await)
+}
+
 #[get("/reviews/{app_id}")]
 #[has_any_permission("user", "admin")]
 pub async fn reviews(
