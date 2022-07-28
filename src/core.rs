@@ -16,6 +16,7 @@ use crate::types::*;
 pub struct Core {
     users: Collection<Document>,
     apps: Collection<Document>,
+    apps_versions: Collection<Document>,
     reviews: Collection<Document>,
     personal_libraries: Collection<Document>,
     jwt_secret: String,
@@ -27,6 +28,7 @@ impl Core {
         Core {
             users: db.collection("users"),
             apps: db.collection("apps"),
+            apps_versions: db.collection("apps_versions"),
             reviews: db.collection("reviews"),
             personal_libraries: db.collection("personal_libraries"),
             jwt_secret: env::var("JWT_SECRET").expect("JWT_SECRET not found"),
@@ -125,9 +127,18 @@ impl Core {
             .unwrap();
     }
 
-    pub async fn get_reviews(&self, app_name_id: &String) -> Vec<Document> {
-        self.get_collection_with_params(&self.reviews, doc! {"app_name_id":app_name_id})
+    pub async fn get_reviews(&self, app_id: &String) -> Vec<Document> {
+        self.get_collection_with_params(&self.reviews, doc! {"app_id":app_id})
             .await
+    }
+
+    pub async fn get_versions(&self, app_id: &String) -> Vec<Document> {
+        self.get_collection_with_params_and_sort(
+            &self.apps_versions,
+            doc! {"app_id":app_id},
+            doc! {"timestamp": -1},
+        )
+        .await
     }
 
     pub async fn write_review(&self, name: &String, info: &Json<ReviewData>) -> serde_json::Value {
@@ -467,6 +478,24 @@ impl Core {
         hasher.update(to_hash + &self.salt);
         let hash = hasher.finalize();
         format!("{:x}", hash)
+    }
+
+    async fn get_collection_with_params_and_sort(
+        &self,
+        collection: &Collection<Document>,
+        params: Document,
+        sort_params: Document,
+    ) -> Vec<Document> {
+        let options = FindOptions::builder()
+            .projection(doc! {"_id" : 0})
+            .sort(sort_params)
+            .build();
+        let cursor = match collection.find(params, options).await {
+            Ok(cursor) => cursor,
+            Err(_) => return vec![],
+        };
+
+        cursor.try_collect().await.unwrap_or_else(|_| vec![])
     }
 
     async fn get_collection_with_params(

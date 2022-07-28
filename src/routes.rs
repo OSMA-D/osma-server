@@ -30,6 +30,15 @@ pub async fn reviews(
     HttpResponse::Ok().json(app_data.core.get_reviews(&app_id).await)
 }
 
+#[get("/versions/{app_id}")]
+#[has_any_permission("user", "admin")]
+pub async fn versions(
+    app_data: web::Data<crate::AppState>,
+    app_id: web::Path<String>,
+) -> impl Responder {
+    HttpResponse::Ok().json(app_data.core.get_versions(&app_id).await)
+}
+
 #[get("/rating/{app_id}")]
 #[has_any_permission("user", "admin")]
 pub async fn rating(

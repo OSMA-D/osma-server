@@ -84,6 +84,7 @@ async fn main() -> std::io::Result<()> {
                     .service(routes::app)
                     .service(routes::reviews)
                     .service(routes::rating)
+                    .service(routes::versions)
                     .service(routes::update)
                     .service(routes::change_password)
                     .service(routes::write_review)
