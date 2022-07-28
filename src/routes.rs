@@ -54,6 +54,15 @@ pub async fn app(app_data: web::Data<crate::AppState>, name: web::Path<String>) 
     response(app_data.core.get_app(&name).await)
 }
 
+#[get("/personal_library")]
+#[has_any_permission("user", "admin")]
+pub async fn personal_library(
+    app_data: web::Data<crate::AppState>,
+    req: HttpRequest,
+) -> impl Responder {
+    response(app_data.core.get_personal_library(&username(req)).await)
+}
+
 #[post("/change_password")]
 #[has_any_permission("user", "admin")]
 pub async fn change_password(

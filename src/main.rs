@@ -80,11 +80,14 @@ async fn main() -> std::io::Result<()> {
             .service(
                 web::scope("/api")
                     .wrap(HttpAuthentication::bearer(jwt_validator))
+                    //get
                     .service(routes::apps)
                     .service(routes::app)
                     .service(routes::reviews)
                     .service(routes::rating)
                     .service(routes::versions)
+                    .service(routes::personal_library)
+                    //post
                     .service(routes::update)
                     .service(routes::change_password)
                     .service(routes::write_review)

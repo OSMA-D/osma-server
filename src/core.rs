@@ -63,6 +63,33 @@ impl Core {
         }
     }
 
+    pub async fn get_personal_library(&self, name: &String) -> serde_json::Value {
+        let response = self
+            .personal_libraries
+            .find_one(doc! {"name":&name}, None)
+            .await;
+        match response {
+            Ok(response) => match response {
+                Some(result) => json!({
+                    "code":"ok_body",
+                    "body": result.get_array("apps").unwrap()
+                }),
+                None => {
+                    json! ({
+                        "code":"denied",
+                        "msg":"This user does not exist"
+                    })
+                }
+            },
+            Err(_) => {
+                json! ({
+                    "code":"err",
+                    "msg":"Unknown error"
+                })
+            }
+        }
+    }
+
     pub async fn get_rating(&self, app_id: &String) -> serde_json::Value {
         let result = self
             .reviews
