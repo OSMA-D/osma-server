@@ -37,7 +37,7 @@ pub struct UserData {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ReviewData {
-    pub app_name_id: String,
+    pub app_id: String,
     pub score: i32,
     pub text: String,
 }
@@ -50,5 +50,5 @@ pub struct PasswordsInf {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AppInfo {
-    pub name: String,
+    pub app_id: String,
 }

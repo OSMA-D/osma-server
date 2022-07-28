@@ -38,7 +38,7 @@ impl Core {
     }
 
     pub async fn get_app(&self, name: &String) -> serde_json::Value {
-        let response = self.apps.find_one(doc! {"name_id":&name}, None).await;
+        let response = self.apps.find_one(doc! {"app_id":&name}, None).await;
         match response {
             Ok(response) => match response {
                 Some(result) => json!({
@@ -61,15 +61,15 @@ impl Core {
         }
     }
 
-    pub async fn get_rating(&self, app_name_id: &String) -> serde_json::Value {
+    pub async fn get_rating(&self, app_id: &String) -> serde_json::Value {
         let result = self
             .reviews
             .aggregate(
                 [
-                    doc! {"$match":{"app_name_id":app_name_id}},
+                    doc! {"$match":{"app_id":app_id}},
                     doc! {
                         "$group": {
-                            "_id": "$app_name_id",
+                            "_id": "$app_id",
                             "rating": {
                                 "$avg": "$score"
                             },
@@ -136,7 +136,7 @@ impl Core {
             .build();
         let response = self
             .apps
-            .find_one(doc! {"name_id":&info.app_name_id}, options)
+            .find_one(doc! {"app_id":&info.app_id}, options)
             .await;
 
         match response {
@@ -148,7 +148,7 @@ impl Core {
                         .update_one(
                             doc! {"user_name": name},
                             doc! {"$set": {
-                                "app_name_id":&info.app_name_id,
+                                "app_id":&info.app_id,
                                 "text":&info.text,
                                 "score":&info.score,
                                 "timestamp":Utc::now().timestamp()
@@ -254,7 +254,7 @@ impl Core {
         let options = FindOneOptions::builder()
             .projection(doc! {"_id" : 1})
             .build();
-        let response = self.apps.find_one(doc! {"name_id":&app}, options).await;
+        let response = self.apps.find_one(doc! {"app_id":&app}, options).await;
         match response {
             Ok(response) => match response {
                 Some(_) => {

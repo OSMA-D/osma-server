@@ -21,22 +21,22 @@ pub async fn apps(app_data: web::Data<crate::AppState>) -> impl Responder {
     HttpResponse::Ok().json(app_data.core.get_apps().await)
 }
 
-#[get("/reviews/{app_name_id}")]
+#[get("/reviews/{app_id}")]
 #[has_any_permission("user", "admin")]
 pub async fn reviews(
     app_data: web::Data<crate::AppState>,
-    app_name_id: web::Path<String>,
+    app_id: web::Path<String>,
 ) -> impl Responder {
-    HttpResponse::Ok().json(app_data.core.get_reviews(&app_name_id).await)
+    HttpResponse::Ok().json(app_data.core.get_reviews(&app_id).await)
 }
 
-#[get("/rating/{app_name_id}")]
+#[get("/rating/{app_id}")]
 #[has_any_permission("user", "admin")]
 pub async fn rating(
     app_data: web::Data<crate::AppState>,
-    app_name_id: web::Path<String>,
+    app_id: web::Path<String>,
 ) -> impl Responder {
-    response(app_data.core.get_rating(&app_name_id).await)
+    response(app_data.core.get_rating(&app_id).await)
 }
 
 #[get("/app/{name}")]
@@ -85,7 +85,7 @@ pub async fn add_app_to_personal_library(
     response(
         app_data
             .core
-            .add_app_to_personal_library(&username(req), &app_info.name)
+            .add_app_to_personal_library(&username(req), &app_info.app_id)
             .await,
     )
 }
@@ -100,7 +100,7 @@ pub async fn delete_app_from_personal_library(
     response(
         app_data
             .core
-            .delete_app_from_personal_library(&username(req), &app_info.name)
+            .delete_app_from_personal_library(&username(req), &app_info.app_id)
             .await,
     )
 }
