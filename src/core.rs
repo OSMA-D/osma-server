@@ -253,6 +253,48 @@ impl Core {
         }
     }
 
+    pub async fn get_latest_version(&self, app_id: &String) -> serde_json::Value {
+        let options = FindOptions::builder()
+            .projection(doc! {"_id" : 0})
+            .sort(doc! {"timestamp":-1})
+            .limit(1)
+            .build();
+
+        let result = self
+            .apps_versions
+            .find(doc! {"app_id":app_id}, options)
+            .await;
+
+        match result {
+            Ok(mut cursor) => match cursor.next().await {
+                Some(result) => match result {
+                    Ok(result) => {
+                        json! ({
+                            "code":"ok_body",
+                            "body":result
+                        })
+                    }
+                    Err(_) => {
+                        json! ({
+                            "code":"err",
+                            "msg":"Unknown error"
+                        })
+                    }
+                },
+                None => {
+                    json! ({
+                        "code":"denied",
+                        "msg":"Versions of this app does not exists"
+                    })
+                }
+            },
+            Err(_) => json! ({
+                "code":"denied",
+                "msg":"Unknown error"
+            }),
+        }
+    }
+
     pub async fn delete_app_from_personal_library(
         &self,
         name: &String,

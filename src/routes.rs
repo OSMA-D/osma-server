@@ -1,6 +1,6 @@
 use crate::types::*;
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
-use actix_web_grants::proc_macro::{has_any_permission, has_permissions};
+use actix_web_grants::proc_macro::has_any_permission;
 
 #[post("/signup")]
 pub async fn signup(app_data: web::Data<crate::AppState>, user: web::Json<User>) -> impl Responder {
@@ -52,6 +52,15 @@ pub async fn rating(
 #[has_any_permission("user", "admin")]
 pub async fn app(app_data: web::Data<crate::AppState>, name: web::Path<String>) -> impl Responder {
     response(app_data.core.get_app(&name).await)
+}
+
+#[get("/latest_version/{name}")]
+#[has_any_permission("user", "admin")]
+pub async fn latest_version(
+    app_data: web::Data<crate::AppState>,
+    name: web::Path<String>,
+) -> impl Responder {
+    response(app_data.core.get_latest_version(&name).await)
 }
 
 #[get("/personal_library")]
