@@ -151,6 +151,7 @@ impl Core {
                                 "app_name_id":&info.app_name_id,
                                 "text":&info.text,
                                 "score":&info.score,
+                                "timestamp":Utc::now().timestamp()
                             }},
                             options,
                         )
