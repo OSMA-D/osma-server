@@ -1,0 +1,55 @@
+{
+  "$jsonSchema": {
+    "bsonType": "object",
+    "required": [
+      "app_id",
+      "name",
+      "description",
+      "icon",
+      "screenshots",
+      "repo",
+      "author",
+      "tags"
+    ],
+    "properties": {
+      "app_id": {
+        "bsonType": "string",
+        "minLength": 3,
+        "maxLength": 5
+      },
+      "name": {
+        "bsonType": "string",
+        "minLength": 1,
+        "maxLength": 16
+      },
+      "description": {
+        "bsonType": "string"
+      },
+      "icon": {
+        "bsonType": "string"
+      },
+      "screenshots": {
+        "bsonType": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "repo": {
+        "bsonType": "string"
+      },
+      "author": {
+        "bsonType": "string",
+        "minLength": 3,
+        "maxLength": 16
+      },
+      "tags": {
+        "bsonType": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        }
+      }
+    }
+  }
+}

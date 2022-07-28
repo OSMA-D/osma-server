@@ -1,0 +1,28 @@
+{
+  "$jsonSchema": {
+    "bsonType": "object",
+    "required": ["app_id", "version", "url", "timestamp", "platform", "type"],
+    "properties": {
+      "name_id": {
+        "bsonType": "string",
+        "minLength": 3,
+        "maxLength": 5
+      },
+      "version": {
+        "bsonType": "string"
+      },
+      "url": {
+        "bsonType": "string"
+      },
+      "platform": {
+        "bsonType": "string"
+      },
+      "type": {
+        "bsonType": "string"
+      },
+      "timestamp": {
+        "bsonType": "number"
+      }
+    }
+  }
+}

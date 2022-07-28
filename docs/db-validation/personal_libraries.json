@@ -1,0 +1,22 @@
+{
+  "$jsonSchema": {
+    "bsonType": "object",
+    "required": ["apps", "name"],
+    "properties": {
+      "name": {
+        "bsonType": "string",
+        "minLength": 3,
+        "maxLength": 16
+      },
+      "apps": {
+        "bsonType": "array",
+        "uniqueItems": true,
+        "items": {
+          "bsonType": "string",
+          "minLength": 3,
+          "maxLength": 5
+        }
+      }
+    }
+  }
+}
