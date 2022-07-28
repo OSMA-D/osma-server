@@ -1,5 +1,7 @@
 `work in progress`
 
+### [Getting started guide](docs/guides/getting-started.md)
+
 # Contributing
 
 When contributing to this repository, please first discuss the change you wish to make via issue,
