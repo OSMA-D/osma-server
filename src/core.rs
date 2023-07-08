@@ -12,6 +12,8 @@ use serde_json::json;
 use sha3::{Digest, Sha3_256};
 use std::env;
 
+use mongodb::error::Error;
+
 use crate::types::*;
 pub struct Core {
     users: Collection<Document>,
@@ -35,7 +37,7 @@ impl Core {
             salt: env::var("SALT").expect("Hash salt not found"),
         }
     }
-    pub async fn get_apps(&self) -> Vec<Document> {
+    pub async fn get_apps(&self) -> Result<Vec<Document>, Error> {
         self.get_collection(&self.apps).await
     }
 
@@ -154,17 +156,17 @@ impl Core {
             .unwrap();
     }
 
-    pub async fn get_reviews(&self, app_id: &String) -> Vec<Document> {
+    pub async fn get_reviews(&self, app_id: &String) -> Result<Vec<Document>, Error> {
         self.get_collection_with_params(&self.reviews, doc! {"app_id":app_id})
             .await
     }
 
-    pub async fn get_apps_by_tag(&self, info: &AppTags) -> Vec<Document> {
+    pub async fn get_apps_by_tag(&self, info: &AppTags) -> Result<Vec<Document>, Error> {
         self.get_collection_with_params(&self.apps, doc! {"tags":{"$in":&info.tags}})
             .await
     }
 
-    pub async fn get_versions(&self, app_id: &String) -> Vec<Document> {
+    pub async fn get_versions(&self, app_id: &String) -> Result<Vec<Document>, Error> {
         self.get_collection_with_params_and_sort(
             &self.apps_versions,
             doc! {"app_id":app_id},
@@ -559,40 +561,43 @@ impl Core {
         collection: &Collection<Document>,
         params: Document,
         sort_params: Document,
-    ) -> Vec<Document> {
+    ) -> Result<Vec<Document>, Error> {
         let options = FindOptions::builder()
             .projection(doc! {"_id" : 0})
             .sort(sort_params)
             .build();
         let cursor = match collection.find(params, options).await {
             Ok(cursor) => cursor,
-            Err(_) => return vec![],
+            Err(e) => return Err(e),
         };
 
-        cursor.try_collect().await.unwrap_or_else(|_| vec![])
+        Ok(cursor.try_collect().await.unwrap_or_else(|_| vec![]))
     }
 
     async fn get_collection_with_params(
         &self,
         collection: &Collection<Document>,
         params: Document,
-    ) -> Vec<Document> {
+    ) -> Result<Vec<Document>, Error> {
         let options = FindOptions::builder().projection(doc! {"_id" : 0}).build();
         let cursor = match collection.find(params, options).await {
             Ok(cursor) => cursor,
-            Err(_) => return vec![],
+            Err(e) => return Err(e),
         };
 
-        cursor.try_collect().await.unwrap_or_else(|_| vec![])
+        Ok(cursor.try_collect().await.unwrap_or_else(|_| vec![]))
     }
 
-    async fn get_collection(&self, collection: &Collection<Document>) -> Vec<Document> {
+    async fn get_collection(
+        &self,
+        collection: &Collection<Document>,
+    ) -> Result<Vec<Document>, Error> {
         let options = FindOptions::builder().projection(doc! {"_id" : 0}).build();
         let cursor = match collection.find(None, options).await {
             Ok(cursor) => cursor,
-            Err(_) => return vec![],
+            Err(e) => return Err(e),
         };
 
-        cursor.try_collect().await.unwrap_or_else(|_| vec![])
+        Ok(cursor.try_collect().await.unwrap_or_else(|_| vec![]))
     }
 }
