@@ -2,7 +2,6 @@ use crate::types::*;
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 use actix_web_grants::proc_macro::has_any_permission;
 use bson::Document;
-use mongodb::error::Error;
 
 #[post("/signup")]
 pub async fn signup(app_data: web::Data<crate::AppState>, user: web::Json<User>) -> impl Responder {
@@ -168,10 +167,10 @@ fn username(req: HttpRequest) -> String {
         .to_string()
 }
 
-fn resolve_collection(resp: Result<Vec<Document>, Error>) -> HttpResponse {
+fn resolve_collection(resp: Result<Vec<Document>, serde_json::Value>) -> HttpResponse {
     match resp {
         Ok(resp) => HttpResponse::Ok().json(resp),
-        Err(e) => HttpResponse::InternalServerError().json(e.to_string()),
+        Err(e) => HttpResponse::InternalServerError().json(e),
     }
 }
 
