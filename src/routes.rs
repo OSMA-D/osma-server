@@ -1,6 +1,7 @@
 use crate::types::*;
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 use actix_web_grants::proc_macro::has_any_permission;
+use bson::Document;
 
 #[post("/signup")]
 pub async fn signup(app_data: web::Data<crate::AppState>, user: web::Json<User>) -> impl Responder {
@@ -18,7 +19,7 @@ pub async fn signin(
 #[get("/apps")]
 #[has_any_permission("user", "admin")]
 pub async fn apps(app_data: web::Data<crate::AppState>) -> impl Responder {
-    HttpResponse::Ok().json(app_data.core.get_apps().await)
+    resolve_collection(app_data.core.get_apps().await)
 }
 
 #[post("/apps_by_tag")]
@@ -27,7 +28,7 @@ pub async fn apps_by_tags(
     app_data: web::Data<crate::AppState>,
     info: web::Json<AppTags>,
 ) -> impl Responder {
-    HttpResponse::Ok().json(app_data.core.get_apps_by_tag(&info).await)
+    resolve_collection(app_data.core.get_apps_by_tag(&info).await)
 }
 
 #[get("/reviews/{app_id}")]
@@ -36,7 +37,7 @@ pub async fn reviews(
     app_data: web::Data<crate::AppState>,
     app_id: web::Path<String>,
 ) -> impl Responder {
-    HttpResponse::Ok().json(app_data.core.get_reviews(&app_id).await)
+    resolve_collection(app_data.core.get_reviews(&app_id).await)
 }
 
 #[get("/versions/{app_id}")]
@@ -45,7 +46,7 @@ pub async fn versions(
     app_data: web::Data<crate::AppState>,
     app_id: web::Path<String>,
 ) -> impl Responder {
-    HttpResponse::Ok().json(app_data.core.get_versions(&app_id).await)
+    resolve_collection(app_data.core.get_versions(&app_id).await)
 }
 
 #[get("/rating/{app_id}")]
@@ -164,6 +165,13 @@ fn username(req: HttpRequest) -> String {
         .ok()
         .unwrap()
         .to_string()
+}
+
+fn resolve_collection(resp: Result<Vec<Document>, serde_json::Value>) -> HttpResponse {
+    match resp {
+        Ok(resp) => HttpResponse::Ok().json(resp),
+        Err(e) => HttpResponse::InternalServerError().json(e),
+    }
 }
 
 fn response(result: serde_json::Value) -> impl Responder {
