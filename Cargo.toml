@@ -9,7 +9,7 @@ dotenv = "0.15.0"
 
 actix-web = "4"
 actix-rt = "2.7.0"
-actix-cors = "0.6.1" 
+actix-cors = "0.7.0" 
 actix-web-grants = "3.0.1"
 actix-web-httpauth = "0.8"
 
